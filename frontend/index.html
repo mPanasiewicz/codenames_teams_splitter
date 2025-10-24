@@ -37,11 +37,14 @@
   <body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
     <div class="container mx-auto px-4 py-8 max-w-6xl">
       <div class="text-center mb-8">
-        <h1 class="text-5xl font-bold text-slate-800 mb-2">🎮 Code Names</h1>
-        <p class="text-slate-600 text-lg">Team Splitter</p>
+        <h1 class="text-5xl font-bold text-slate-800 mb-2">🎮 Codenames</h1>
+        <p class="text-slate-600 text-lg">Trailblazers Team Splitter</p>
       </div>
 
-      <div id="messageContainer" class="fixed top-4 right-4 z-50 space-y-2 max-w-md"></div>
+      <div
+        id="messageContainer"
+        class="fixed top-4 right-4 z-50 space-y-2 max-w-md"
+      ></div>
 
       <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
         <h2 class="text-2xl font-semibold text-slate-800 mb-4">Add Players</h2>
@@ -52,17 +55,17 @@
             class="flex-1 px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all"
             placeholder="Enter player name"
           />
-          <button 
+          <button
             class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-md"
             onclick="addName()"
           >
             Add
           </button>
         </div>
-        
+
         <ul id="nameList" class="mt-4 space-y-2"></ul>
-        
-        <button 
+
+        <button
           class="w-full mt-6 px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-lg rounded-xl transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg"
           onclick="splitTeams()"
         >
@@ -71,13 +74,13 @@
       </div>
 
       <div class="flex gap-3 mb-6">
-        <button 
+        <button
           class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-md"
           onclick="saveSpymasters()"
         >
           💾 Save Spymasters
         </button>
-        <button 
+        <button
           class="flex-1 px-6 py-3 bg-slate-600 hover:bg-slate-700 text-white font-semibold rounded-xl transition-all shadow-md"
           onclick="clearSpymasters()"
         >
@@ -86,12 +89,21 @@
       </div>
 
       <div class="grid md:grid-cols-2 gap-6 mb-8">
-        <div class="bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl shadow-xl p-6 transform transition-all hover:scale-[1.02]">
-          <h2 class="text-3xl font-bold text-white mb-4 flex items-center gap-2">
+        <div
+          class="bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl shadow-xl p-6 transform transition-all hover:scale-[1.02]"
+        >
+          <h2
+            class="text-3xl font-bold text-white mb-4 flex items-center gap-2"
+          >
             <span>🔴</span> Red Team
           </h2>
+          <div
+            id="redSpymaster"
+            class="mb-4 p-3 bg-yellow-400 rounded-xl border-2 border-yellow-500"
+          ></div>
+          <h3 class="text-xl font-bold text-white mb-2">Operatives</h3>
           <ul id="redTeam" class="space-y-2"></ul>
-          <button 
+          <button
             id="redWinBtn"
             class="w-full mt-4 px-4 py-3 bg-white text-rose-600 font-bold rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hidden"
             onclick="markWinner('red')"
@@ -100,12 +112,21 @@
           </button>
         </div>
 
-        <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-xl p-6 transform transition-all hover:scale-[1.02]">
-          <h2 class="text-3xl font-bold text-white mb-4 flex items-center gap-2">
+        <div
+          class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-xl p-6 transform transition-all hover:scale-[1.02]"
+        >
+          <h2
+            class="text-3xl font-bold text-white mb-4 flex items-center gap-2"
+          >
             <span>🔵</span> Blue Team
           </h2>
+          <div
+            id="blueSpymaster"
+            class="mb-4 p-3 bg-yellow-400 rounded-xl border-2 border-yellow-500"
+          ></div>
+          <h3 class="text-xl font-bold text-white mb-2">Operatives</h3>
           <ul id="blueTeam" class="space-y-2"></ul>
-          <button 
+          <button
             id="blueWinBtn"
             class="w-full mt-4 px-4 py-3 bg-white text-blue-600 font-bold rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hidden"
             onclick="markWinner('blue')"
@@ -123,9 +144,13 @@
       </div>
 
       <div class="bg-white rounded-2xl shadow-lg p-6">
-        <h3 class="text-2xl font-semibold text-slate-800 mb-4">🏆 Win Statistics</h3>
+        <h3 class="text-2xl font-semibold text-slate-800 mb-4">
+          🏆 Win Statistics
+        </h3>
         <div id="winStats" class="grid md:grid-cols-2 gap-4">
-          <div class="bg-gradient-to-br from-rose-50 to-red-50 border-2 border-rose-200 rounded-xl p-4">
+          <div
+            class="bg-gradient-to-br from-rose-50 to-red-50 border-2 border-rose-200 rounded-xl p-4"
+          >
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-rose-600 font-semibold text-lg">🔴 Red Team</p>
@@ -134,7 +159,9 @@
               <div class="text-rose-300 text-5xl">🏆</div>
             </div>
           </div>
-          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4">
+          <div
+            class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4"
+          >
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-blue-600 font-semibold text-lg">🔵 Blue Team</p>
@@ -148,7 +175,7 @@
     </div>
 
     <script>
-      const API_URL = 'http://localhost:3000/api';
+      const API_URL = "http://localhost:3000/api";
       let names = [
         "Beth",
         "Melissa",
@@ -174,29 +201,32 @@
           if (data.redSpymaster && data.blueSpymaster) {
             currentRedSpymaster = data.redSpymaster;
             currentBlueSpymaster = data.blueSpymaster;
-            console.log('Loaded saved spymasters:', data);
+            console.log("Loaded saved spymasters:", data);
           }
         } catch (error) {
-          console.error('Error loading spymasters:', error);
+          console.error("Error loading spymasters:", error);
         }
       }
 
       async function saveSpymasters() {
         if (!currentRedSpymaster || !currentBlueSpymaster) {
-          showMessage('Please split teams first to save spymasters.', 'warning');
+          showMessage(
+            "Please split teams first to save spymasters.",
+            "warning",
+          );
           return;
         }
 
         if (!currentWinner) {
-          showMessage('Please select a winner before saving!', 'warning');
+          showMessage("Please select a winner before saving!", "warning");
           return;
         }
 
         try {
           const response = await fetch(`${API_URL}/spymasters`, {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               redSpymaster: currentRedSpymaster,
@@ -207,103 +237,106 @@
             }),
           });
           const data = await response.json();
-          showMessage('Spymasters saved successfully!', 'success');
+          showMessage("Spymasters saved successfully!", "success");
           await loadSpymastersHistory();
           await loadWinStats();
         } catch (error) {
-          console.error('Error saving spymasters:', error);
-          showMessage('Failed to save spymasters.', 'danger');
+          console.error("Error saving spymasters:", error);
+          showMessage("Failed to save spymasters.", "danger");
         }
       }
 
       async function clearSpymasters() {
-        if (!confirm('Are you sure you want to clear all saved spymasters?')) {
+        if (!confirm("Are you sure you want to clear all saved spymasters?")) {
           return;
         }
 
         try {
           const response = await fetch(`${API_URL}/spymasters`, {
-            method: 'DELETE',
+            method: "DELETE",
           });
           const data = await response.json();
           currentRedSpymaster = null;
           currentBlueSpymaster = null;
-          showMessage('Saved spymasters cleared successfully!', 'success');
+          showMessage("Saved spymasters cleared successfully!", "success");
           await loadSpymastersHistory();
         } catch (error) {
-          console.error('Error clearing spymasters:', error);
-          showMessage('Failed to clear spymasters.', 'danger');
+          console.error("Error clearing spymasters:", error);
+          showMessage("Failed to clear spymasters.", "danger");
         }
       }
 
-      function showMessage(message, type = 'info') {
-        const container = document.getElementById('messageContainer');
-        const alertDiv = document.createElement('div');
-        
+      function showMessage(message, type = "info") {
+        const container = document.getElementById("messageContainer");
+        const alertDiv = document.createElement("div");
+
         const colors = {
-          success: 'bg-emerald-500 border-emerald-600',
-          warning: 'bg-amber-500 border-amber-600',
-          danger: 'bg-rose-500 border-rose-600',
-          info: 'bg-blue-500 border-blue-600'
+          success: "bg-emerald-500 border-emerald-600",
+          warning: "bg-amber-500 border-amber-600",
+          danger: "bg-rose-500 border-rose-600",
+          info: "bg-blue-500 border-blue-600",
         };
-        
+
         alertDiv.className = `${colors[type] || colors.info} text-white px-6 py-4 rounded-xl shadow-lg border-l-4 alert-enter flex items-center justify-between`;
         alertDiv.innerHTML = `
           <span class="font-semibold">${message}</span>
           <button onclick="this.parentElement.remove()" class="ml-4 text-white hover:text-gray-200 font-bold text-xl">×</button>
         `;
         container.appendChild(alertDiv);
-        
+
         setTimeout(() => {
-          alertDiv.classList.add('alert-exit');
+          alertDiv.classList.add("alert-exit");
           setTimeout(() => alertDiv.remove(), 300);
         }, 3000);
       }
 
       function markWinner(team) {
         currentWinner = team;
-        const redBtn = document.getElementById('redWinBtn');
-        const blueBtn = document.getElementById('blueWinBtn');
-        
+        const redBtn = document.getElementById("redWinBtn");
+        const blueBtn = document.getElementById("blueWinBtn");
+
         redBtn.disabled = true;
         blueBtn.disabled = true;
-        
-        showMessage(`🎉 ${team === 'red' ? 'Red' : 'Blue'} Team wins! Click "Save Spymasters" to record this game.`, 'success');
+
+        showMessage(
+          `🎉 ${team === "red" ? "Red" : "Blue"} Team wins! Click "Save Spymasters" to record this game.`,
+          "success",
+        );
       }
 
       async function loadWinStats() {
         try {
           const response = await fetch(`${API_URL}/spymasters/stats`);
           const data = await response.json();
-          
-          document.getElementById('redWins').textContent = data.red || 0;
-          document.getElementById('blueWins').textContent = data.blue || 0;
+
+          document.getElementById("redWins").textContent = data.red || 0;
+          document.getElementById("blueWins").textContent = data.blue || 0;
         } catch (error) {
-          console.error('Error loading win stats:', error);
+          console.error("Error loading win stats:", error);
         }
       }
 
       async function deleteHistoryEntry(id) {
-        if (!confirm('Are you sure you want to delete this entry?')) {
+        if (!confirm("Are you sure you want to delete this entry?")) {
           return;
         }
 
         try {
           const response = await fetch(`${API_URL}/spymasters/${id}`, {
-            method: 'DELETE',
+            method: "DELETE",
           });
           const data = await response.json();
-          
+
           if (response.ok) {
-            showMessage('Entry deleted successfully!', 'success');
+            showMessage("Entry deleted successfully!", "success");
             await loadSpymastersHistory();
             await loadWinStats();
           } else {
-            showMessage(data.error || 'Failed to delete entry.', 'danger');
+            showMessage(data.error || "Failed to delete entry.", "danger");
           }
         } catch (error) {
-          console.error('Error deleting entry:', error);
-          showMessage('Failed to delete entry.', 'danger');
+          console.error("Error deleting entry:", error);
+          showMessage("Failed to delete entry.", "danger");
         }
       }
 
@@ -311,33 +344,51 @@
         try {
           const response = await fetch(`${API_URL}/spymasters/history`);
           const data = await response.json();
-          const historyDiv = document.getElementById('spymastersHistory');
-          
+          const historyDiv = document.getElementById("spymastersHistory");
+
           if (!data.history || data.history.length === 0) {
-            historyDiv.innerHTML = '<p class="text-slate-400">No saved spymasters yet.</p>';
+            historyDiv.innerHTML =
+              '<p class="text-slate-400">No saved spymasters yet.</p>';
             return;
           }
 
-          historyDiv.innerHTML = '';
+          historyDiv.innerHTML = "";
           data.history.forEach((entry) => {
-            const item = document.createElement('div');
-            item.className = 'bg-slate-50 border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow';
+            const item = document.createElement("div");
+            item.className =
+              "bg-slate-50 border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow";
             const date = new Date(entry.createdAt).toLocaleString();
-            
-            let winnerBadge = '';
-            if (entry.winner === 'red') {
-              winnerBadge = '<span class="text-rose-600 font-bold">🏆 Red Won</span>';
-            } else if (entry.winner === 'blue') {
-              winnerBadge = '<span class="text-blue-600 font-bold">🏆 Blue Won</span>';
+
+            let winnerBadge = "";
+            if (entry.winner === "red") {
+              winnerBadge =
+                '<span class="text-rose-600 font-bold">🏆 Red Won</span>';
+            } else if (entry.winner === "blue") {
+              winnerBadge =
+                '<span class="text-blue-600 font-bold">🏆 Blue Won</span>';
             }
-            
-            const redTeamList = entry.redTeam && entry.redTeam.length > 0 
-              ? entry.redTeam.map((player, idx) => idx === 0 ? `<strong>${player} (Spymaster)</strong>` : player).join(', ')
-              : entry.redSpymaster;
-            const blueTeamList = entry.blueTeam && entry.blueTeam.length > 0
-              ? entry.blueTeam.map((player, idx) => idx === 0 ? `<strong>${player} (Spymaster)</strong>` : player).join(', ')
-              : entry.blueSpymaster;
-            
+
+            const redTeamList =
+              entry.redTeam && entry.redTeam.length > 0
+                ? entry.redTeam
+                    .map((player, idx) =>
+                      idx === 0
+                        ? `<strong>${player} (Spymaster)</strong>`
+                        : player,
+                    )
+                    .join(", ")
+                : entry.redSpymaster;
+            const blueTeamList =
+              entry.blueTeam && entry.blueTeam.length > 0
+                ? entry.blueTeam
+                    .map((player, idx) =>
+                      idx === 0
+                        ? `<strong>${player} (Spymaster)</strong>`
+                        : player,
+                    )
+                    .join(", ")
+                : entry.blueSpymaster;
+
             item.innerHTML = `
               <div class="flex flex-wrap gap-4 items-start">
                 <div class="flex-1 min-w-[200px]">
@@ -353,9 +404,9 @@
                   <div class="text-slate-700 text-sm">${blueTeamList}</div>
                 </div>
                 <div class="flex items-center gap-2">
-                  ${winnerBadge ? `<div class="flex items-center">${winnerBadge}</div>` : ''}
+                  ${winnerBadge ? `<div class="flex items-center">${winnerBadge}</div>` : ""}
                   <span class="text-slate-400 text-sm">${date}</span>
-                  <button 
+                  <button
                     class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-all text-sm shadow-md"
                     onclick="deleteHistoryEntry(${entry.id})"
                     title="Delete this entry"
@@ -368,9 +419,10 @@
             historyDiv.appendChild(item);
           });
         } catch (error) {
-          console.error('Error loading history:', error);
-          const historyDiv = document.getElementById('spymastersHistory');
-          historyDiv.innerHTML = '<p class="text-rose-500">Failed to load history.</p>';
+          console.error("Error loading history:", error);
+          const historyDiv = document.getElementById("spymastersHistory");
+          historyDiv.innerHTML =
+            '<p class="text-rose-500">Failed to load history.</p>';
         }
       }
 
@@ -378,7 +430,8 @@
         const nameList = document.getElementById("nameList");
         names.forEach((name) => {
           const li = document.createElement("li");
-          li.className = "flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 hover:shadow-md transition-all";
+          li.className =
+            "flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 hover:shadow-md transition-all";
           li.innerHTML = `
             <span class="text-slate-700 font-medium">${name}</span>
           `;
@@ -393,7 +446,8 @@
         if (name) {
           names.push(name);
           const li = document.createElement("li");
-          li.className = "flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 hover:shadow-md transition-all";
+          li.className =
+            "flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 hover:shadow-md transition-all";
           li.innerHTML = `
             <span class="text-slate-700 font-medium">${name}</span>
           `;
@@ -405,7 +459,8 @@
 
       function createRemoveButton(name) {
         const button = document.createElement("button");
-        button.className = "px-3 py-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-lg transition-all text-sm";
+        button.className =
+          "px-3 py-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-lg transition-all text-sm";
         button.textContent = "✕";
         button.onclick = () => removeName(name);
         return button;
@@ -444,26 +499,28 @@
         displayTeam("redTeam", redTeam);
         displayTeam("blueTeam", blueTeam);
 
-        const redBtn = document.getElementById('redWinBtn');
-        const blueBtn = document.getElementById('blueWinBtn');
-        redBtn.classList.remove('hidden');
-        blueBtn.classList.remove('hidden');
+        const redBtn = document.getElementById("redWinBtn");
+        const blueBtn = document.getElementById("blueWinBtn");
+        redBtn.classList.remove("hidden");
+        blueBtn.classList.remove("hidden");
         redBtn.disabled = false;
         blueBtn.disabled = false;
       }
 
       function displayTeam(teamId, team) {
+        const spymasterDiv = document.getElementById(
+          teamId === "redTeam" ? "redSpymaster" : "blueSpymaster",
+        );
         const teamElement = document.getElementById(teamId);
+
+        spymasterDiv.innerHTML = `<div class="font-bold text-slate-800 text-lg">🕵️‍♂️ ${team[0]} - Spymaster</div>`;
+
         teamElement.innerHTML = "";
-        team.forEach((name, index) => {
+        team.slice(1).forEach((name) => {
           const li = document.createElement("li");
-          li.className = "p-3 border-b border-gray-700 last:border-0";
-          if (index === 0) {
-            li.classList.add("font-bold", "text-yellow-400");
-            li.innerHTML = `🕵️‍♂️ ${name} - Spymaster`;
-          } else {
-            li.textContent = `${name} - Operative`;
-          }
+          li.className =
+            "p-3 border-b border-white/20 last:border-0 text-white";
+          li.textContent = `${name} - Operative`;
           teamElement.appendChild(li);
         });
       }
