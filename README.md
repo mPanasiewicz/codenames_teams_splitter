@@ -2,6 +2,8 @@
 
 A web application for splitting Codenames players into balanced teams, tracking spymasters, and recording game statistics.
 
+<img width="1432" height="2057" alt="localhost_8080_ (1)" src="https://github.com/user-attachments/assets/c462d5d2-39a2-4e78-b953-7ab656799e0e" />
+
 ## Features
 
 - 🎲 Random team splitting with automatic spymaster assignment
