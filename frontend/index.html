@@ -91,6 +91,13 @@
             <span>🔴</span> Red Team
           </h2>
           <ul id="redTeam" class="space-y-2"></ul>
+          <button 
+            id="redWinBtn"
+            class="w-full mt-4 px-4 py-3 bg-white text-rose-600 font-bold rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hidden"
+            onclick="markWinner('red')"
+          >
+            🏆 Red Team Won!
+          </button>
         </div>
 
         <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-xl p-6 transform transition-all hover:scale-[1.02]">
@@ -98,13 +105,44 @@
             <span>🔵</span> Blue Team
           </h2>
           <ul id="blueTeam" class="space-y-2"></ul>
+          <button 
+            id="blueWinBtn"
+            class="w-full mt-4 px-4 py-3 bg-white text-blue-600 font-bold rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hidden"
+            onclick="markWinner('blue')"
+          >
+            🏆 Blue Team Won!
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+        <h3 class="text-2xl font-semibold text-slate-800 mb-4">📜 History</h3>
+        <div id="spymastersHistory" class="space-y-2">
+          <p class="text-slate-400">Loading history...</p>
         </div>
       </div>
 
       <div class="bg-white rounded-2xl shadow-lg p-6">
-        <h3 class="text-2xl font-semibold text-slate-800 mb-4">📜 History</h3>
-        <div id="spymastersHistory" class="space-y-2">
-          <p class="text-slate-400">Loading history...</p>
+        <h3 class="text-2xl font-semibold text-slate-800 mb-4">🏆 Win Statistics</h3>
+        <div id="winStats" class="grid md:grid-cols-2 gap-4">
+          <div class="bg-gradient-to-br from-rose-50 to-red-50 border-2 border-rose-200 rounded-xl p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-rose-600 font-semibold text-lg">🔴 Red Team</p>
+                <p class="text-3xl font-bold text-rose-700" id="redWins">0</p>
+              </div>
+              <div class="text-rose-300 text-5xl">🏆</div>
+            </div>
+          </div>
+          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-blue-600 font-semibold text-lg">🔵 Blue Team</p>
+                <p class="text-3xl font-bold text-blue-700" id="blueWins">0</p>
+              </div>
+              <div class="text-blue-300 text-5xl">🏆</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -125,6 +163,7 @@
       ];
       let currentRedSpymaster = null;
       let currentBlueSpymaster = null;
+      let currentWinner = null;
 
       async function loadSavedSpymasters() {
         try {
@@ -155,11 +194,13 @@
             body: JSON.stringify({
               redSpymaster: currentRedSpymaster,
               blueSpymaster: currentBlueSpymaster,
+              winner: currentWinner,
             }),
           });
           const data = await response.json();
           showMessage('Spymasters saved successfully!', 'success');
           await loadSpymastersHistory();
+          await loadWinStats();
         } catch (error) {
           console.error('Error saving spymasters:', error);
           showMessage('Failed to save spymasters.', 'danger');
@@ -210,6 +251,29 @@
         }, 3000);
       }
 
+      function markWinner(team) {
+        currentWinner = team;
+        const redBtn = document.getElementById('redWinBtn');
+        const blueBtn = document.getElementById('blueWinBtn');
+        
+        redBtn.disabled = true;
+        blueBtn.disabled = true;
+        
+        showMessage(`🎉 ${team === 'red' ? 'Red' : 'Blue'} Team wins! Click "Save Spymasters" to record this game.`, 'success');
+      }
+
+      async function loadWinStats() {
+        try {
+          const response = await fetch(`${API_URL}/spymasters/stats`);
+          const data = await response.json();
+          
+          document.getElementById('redWins').textContent = data.red || 0;
+          document.getElementById('blueWins').textContent = data.blue || 0;
+        } catch (error) {
+          console.error('Error loading win stats:', error);
+        }
+      }
+
       async function loadSpymastersHistory() {
         try {
           const response = await fetch(`${API_URL}/spymasters/history`);
@@ -226,6 +290,14 @@
             const item = document.createElement('div');
             item.className = 'bg-slate-50 border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow';
             const date = new Date(entry.createdAt).toLocaleString();
+            
+            let winnerBadge = '';
+            if (entry.winner === 'red') {
+              winnerBadge = '<span class="text-rose-600 font-bold">🏆 Red Won</span>';
+            } else if (entry.winner === 'blue') {
+              winnerBadge = '<span class="text-blue-600 font-bold">🏆 Blue Won</span>';
+            }
+            
             item.innerHTML = `
               <div class="flex flex-wrap gap-4 items-center">
                 <div class="flex items-center gap-2">
@@ -236,6 +308,7 @@
                   <span class="text-blue-600 font-bold">🔵 Blue:</span>
                   <span class="text-slate-700">${entry.blueSpymaster}</span>
                 </div>
+                ${winnerBadge ? `<div class="flex items-center">${winnerBadge}</div>` : ''}
                 <span class="text-slate-400 text-sm ml-auto">${date}</span>
               </div>
             `;
@@ -311,9 +384,17 @@
 
         currentRedSpymaster = redTeam[0];
         currentBlueSpymaster = blueTeam[0];
+        currentWinner = null;
 
         displayTeam("redTeam", redTeam);
         displayTeam("blueTeam", blueTeam);
+
+        const redBtn = document.getElementById('redWinBtn');
+        const blueBtn = document.getElementById('blueWinBtn');
+        redBtn.classList.remove('hidden');
+        blueBtn.classList.remove('hidden');
+        redBtn.disabled = false;
+        blueBtn.disabled = false;
       }
 
       function displayTeam(teamId, team) {
@@ -321,9 +402,9 @@
         teamElement.innerHTML = "";
         team.forEach((name, index) => {
           const li = document.createElement("li");
-          li.className = "list-group-item";
+          li.className = "p-3 border-b border-gray-700 last:border-0";
           if (index === 0) {
-            li.classList.add("spymaster");
+            li.classList.add("font-bold", "text-yellow-400");
             li.innerHTML = `🕵️‍♂️ ${name} - Spymaster`;
           } else {
             li.textContent = `${name} - Operative`;
@@ -335,6 +416,7 @@
       window.onload = async () => {
         await loadSavedSpymasters();
         await loadSpymastersHistory();
+        await loadWinStats();
         initializeNames();
       };
     </script>

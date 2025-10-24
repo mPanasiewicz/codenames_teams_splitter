@@ -18,6 +18,7 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       red_spymaster TEXT NOT NULL,
       blue_spymaster TEXT NOT NULL,
+      winner TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -47,22 +48,37 @@ app.get('/api/spymasters/history', (req, res) => {
       history: rows.map(row => ({
         redSpymaster: row.red_spymaster,
         blueSpymaster: row.blue_spymaster,
+        winner: row.winner,
         createdAt: row.created_at
       }))
     });
   });
 });
 
+app.get('/api/spymasters/stats', (req, res) => {
+  db.all('SELECT winner, COUNT(*) as count FROM spymasters WHERE winner IS NOT NULL GROUP BY winner', (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    const stats = { red: 0, blue: 0 };
+    rows.forEach(row => {
+      if (row.winner === 'red') stats.red = row.count;
+      if (row.winner === 'blue') stats.blue = row.count;
+    });
+    res.json(stats);
+  });
+});
+
 app.post('/api/spymasters', (req, res) => {
-  const { redSpymaster, blueSpymaster } = req.body;
+  const { redSpymaster, blueSpymaster, winner } = req.body;
   
   if (!redSpymaster || !blueSpymaster) {
     return res.status(400).json({ error: 'Both spymasters are required' });
   }
   
   db.run(
-    'INSERT INTO spymasters (red_spymaster, blue_spymaster) VALUES (?, ?)',
-    [redSpymaster, blueSpymaster],
+    'INSERT INTO spymasters (red_spymaster, blue_spymaster, winner) VALUES (?, ?, ?)',
+    [redSpymaster, blueSpymaster, winner || null],
     function(err) {
       if (err) {
         return res.status(500).json({ error: err.message });
@@ -70,7 +86,8 @@ app.post('/api/spymasters', (req, res) => {
       res.json({
         message: 'Spymasters saved successfully',
         redSpymaster,
-        blueSpymaster
+        blueSpymaster,
+        winner: winner || null
       });
     }
   );
