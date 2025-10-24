@@ -187,6 +187,11 @@
           return;
         }
 
+        if (!currentWinner) {
+          showMessage('Please select a winner before saving!', 'warning');
+          return;
+        }
+
         try {
           const response = await fetch(`${API_URL}/spymasters`, {
             method: 'POST',
