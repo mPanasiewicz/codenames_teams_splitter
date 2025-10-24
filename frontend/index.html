@@ -163,6 +163,8 @@
       ];
       let currentRedSpymaster = null;
       let currentBlueSpymaster = null;
+      let currentRedTeam = [];
+      let currentBlueTeam = [];
       let currentWinner = null;
 
       async function loadSavedSpymasters() {
@@ -194,6 +196,8 @@
             body: JSON.stringify({
               redSpymaster: currentRedSpymaster,
               blueSpymaster: currentBlueSpymaster,
+              redTeam: currentRedTeam,
+              blueTeam: currentBlueTeam,
               winner: currentWinner,
             }),
           });
@@ -274,6 +278,30 @@
         }
       }
 
+      async function deleteHistoryEntry(id) {
+        if (!confirm('Are you sure you want to delete this entry?')) {
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_URL}/spymasters/${id}`, {
+            method: 'DELETE',
+          });
+          const data = await response.json();
+          
+          if (response.ok) {
+            showMessage('Entry deleted successfully!', 'success');
+            await loadSpymastersHistory();
+            await loadWinStats();
+          } else {
+            showMessage(data.error || 'Failed to delete entry.', 'danger');
+          }
+        } catch (error) {
+          console.error('Error deleting entry:', error);
+          showMessage('Failed to delete entry.', 'danger');
+        }
+      }
+
       async function loadSpymastersHistory() {
         try {
           const response = await fetch(`${API_URL}/spymasters/history`);
@@ -298,18 +326,38 @@
               winnerBadge = '<span class="text-blue-600 font-bold">🏆 Blue Won</span>';
             }
             
+            const redTeamList = entry.redTeam && entry.redTeam.length > 0 
+              ? entry.redTeam.map((player, idx) => idx === 0 ? `<strong>${player} (Spymaster)</strong>` : player).join(', ')
+              : entry.redSpymaster;
+            const blueTeamList = entry.blueTeam && entry.blueTeam.length > 0
+              ? entry.blueTeam.map((player, idx) => idx === 0 ? `<strong>${player} (Spymaster)</strong>` : player).join(', ')
+              : entry.blueSpymaster;
+            
             item.innerHTML = `
-              <div class="flex flex-wrap gap-4 items-center">
-                <div class="flex items-center gap-2">
-                  <span class="text-rose-600 font-bold">🔴 Red:</span>
-                  <span class="text-slate-700">${entry.redSpymaster}</span>
+              <div class="flex flex-wrap gap-4 items-start">
+                <div class="flex-1 min-w-[200px]">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-rose-600 font-bold">🔴 Red Team:</span>
+                  </div>
+                  <div class="text-slate-700 text-sm">${redTeamList}</div>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-blue-600 font-bold">🔵 Blue Team:</span>
+                  </div>
+                  <div class="text-slate-700 text-sm">${blueTeamList}</div>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-blue-600 font-bold">🔵 Blue:</span>
-                  <span class="text-slate-700">${entry.blueSpymaster}</span>
+                  ${winnerBadge ? `<div class="flex items-center">${winnerBadge}</div>` : ''}
+                  <span class="text-slate-400 text-sm">${date}</span>
+                  <button 
+                    class="px-3 py-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-lg transition-all text-sm"
+                    onclick="deleteHistoryEntry(${entry.id})"
+                    title="Delete this entry"
+                  >
+                    🗑️
+                  </button>
                 </div>
-                ${winnerBadge ? `<div class="flex items-center">${winnerBadge}</div>` : ''}
-                <span class="text-slate-400 text-sm ml-auto">${date}</span>
               </div>
             `;
             historyDiv.appendChild(item);
@@ -384,6 +432,8 @@
 
         currentRedSpymaster = redTeam[0];
         currentBlueSpymaster = blueTeam[0];
+        currentRedTeam = redTeam;
+        currentBlueTeam = blueTeam;
         currentWinner = null;
 
         displayTeam("redTeam", redTeam);

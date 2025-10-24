@@ -18,10 +18,24 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       red_spymaster TEXT NOT NULL,
       blue_spymaster TEXT NOT NULL,
+      red_team TEXT,
+      blue_team TEXT,
       winner TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+  
+  db.run(`ALTER TABLE spymasters ADD COLUMN red_team TEXT`, (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.error('Error adding red_team column:', err.message);
+    }
+  });
+  
+  db.run(`ALTER TABLE spymasters ADD COLUMN blue_team TEXT`, (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.error('Error adding blue_team column:', err.message);
+    }
+  });
 });
 
 app.get('/api/spymasters', (req, res) => {
@@ -46,8 +60,11 @@ app.get('/api/spymasters/history', (req, res) => {
     }
     res.json({
       history: rows.map(row => ({
+        id: row.id,
         redSpymaster: row.red_spymaster,
         blueSpymaster: row.blue_spymaster,
+        redTeam: row.red_team ? JSON.parse(row.red_team) : [],
+        blueTeam: row.blue_team ? JSON.parse(row.blue_team) : [],
         winner: row.winner,
         createdAt: row.created_at
       }))
@@ -70,15 +87,15 @@ app.get('/api/spymasters/stats', (req, res) => {
 });
 
 app.post('/api/spymasters', (req, res) => {
-  const { redSpymaster, blueSpymaster, winner } = req.body;
+  const { redSpymaster, blueSpymaster, redTeam, blueTeam, winner } = req.body;
   
   if (!redSpymaster || !blueSpymaster) {
     return res.status(400).json({ error: 'Both spymasters are required' });
   }
   
   db.run(
-    'INSERT INTO spymasters (red_spymaster, blue_spymaster, winner) VALUES (?, ?, ?)',
-    [redSpymaster, blueSpymaster, winner || null],
+    'INSERT INTO spymasters (red_spymaster, blue_spymaster, red_team, blue_team, winner) VALUES (?, ?, ?, ?, ?)',
+    [redSpymaster, blueSpymaster, JSON.stringify(redTeam || []), JSON.stringify(blueTeam || []), winner || null],
     function(err) {
       if (err) {
         return res.status(500).json({ error: err.message });
@@ -87,10 +104,25 @@ app.post('/api/spymasters', (req, res) => {
         message: 'Spymasters saved successfully',
         redSpymaster,
         blueSpymaster,
+        redTeam,
+        blueTeam,
         winner: winner || null
       });
     }
   );
+});
+
+app.delete('/api/spymasters/:id', (req, res) => {
+  const { id } = req.params;
+  db.run('DELETE FROM spymasters WHERE id = ?', [id], function(err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Entry not found' });
+    }
+    res.json({ message: 'Entry deleted successfully' });
+  });
 });
 
 app.delete('/api/spymasters', (req, res) => {
