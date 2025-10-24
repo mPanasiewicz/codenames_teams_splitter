@@ -90,29 +90,6 @@
 
       <div class="grid md:grid-cols-2 gap-6 mb-8">
         <div
-          class="bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl shadow-xl p-6 transform transition-all hover:scale-[1.02]"
-        >
-          <h2
-            class="text-3xl font-bold text-white mb-4 flex items-center gap-2"
-          >
-            <span>🔴</span> Red Team
-          </h2>
-          <div
-            id="redSpymaster"
-            class="mb-4 p-3 bg-yellow-400 rounded-xl border-2 border-yellow-500"
-          ></div>
-          <h3 class="text-xl font-bold text-white mb-2">Operatives</h3>
-          <ul id="redTeam" class="space-y-2"></ul>
-          <button
-            id="redWinBtn"
-            class="w-full mt-4 px-4 py-3 bg-white text-rose-600 font-bold rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hidden"
-            onclick="markWinner('red')"
-          >
-            🏆 Red Team Won!
-          </button>
-        </div>
-
-        <div
           class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-xl p-6 transform transition-all hover:scale-[1.02]"
         >
           <h2
@@ -134,6 +111,29 @@
             🏆 Blue Team Won!
           </button>
         </div>
+
+        <div
+          class="bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl shadow-xl p-6 transform transition-all hover:scale-[1.02]"
+        >
+          <h2
+            class="text-3xl font-bold text-white mb-4 flex items-center gap-2"
+          >
+            <span>🔴</span> Red Team
+          </h2>
+          <div
+            id="redSpymaster"
+            class="mb-4 p-3 bg-yellow-400 rounded-xl border-2 border-yellow-500"
+          ></div>
+          <h3 class="text-xl font-bold text-white mb-2">Operatives</h3>
+          <ul id="redTeam" class="space-y-2"></ul>
+          <button
+            id="redWinBtn"
+            class="w-full mt-4 px-4 py-3 bg-white text-rose-600 font-bold rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hidden"
+            onclick="markWinner('red')"
+          >
+            🏆 Red Team Won!
+          </button>
+        </div>
       </div>
 
       <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
@@ -149,17 +149,6 @@
         </h3>
         <div id="winStats" class="grid md:grid-cols-2 gap-4">
           <div
-            class="bg-gradient-to-br from-rose-50 to-red-50 border-2 border-rose-200 rounded-xl p-4"
-          >
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-rose-600 font-semibold text-lg">🔴 Red Team</p>
-                <p class="text-3xl font-bold text-rose-700" id="redWins">0</p>
-              </div>
-              <div class="text-rose-300 text-5xl">🏆</div>
-            </div>
-          </div>
-          <div
             class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4"
           >
             <div class="flex items-center justify-between">
@@ -168,6 +157,17 @@
                 <p class="text-3xl font-bold text-blue-700" id="blueWins">0</p>
               </div>
               <div class="text-blue-300 text-5xl">🏆</div>
+            </div>
+          </div>
+          <div
+            class="bg-gradient-to-br from-rose-50 to-red-50 border-2 border-rose-200 rounded-xl p-4"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-rose-600 font-semibold text-lg">🔴 Red Team</p>
+                <p class="text-3xl font-bold text-rose-700" id="redWins">0</p>
+              </div>
+              <div class="text-rose-300 text-5xl">🏆</div>
             </div>
           </div>
         </div>
@@ -393,15 +393,15 @@
               <div class="flex flex-wrap gap-4 items-start">
                 <div class="flex-1 min-w-[200px]">
                   <div class="flex items-center gap-2 mb-1">
-                    <span class="text-rose-600 font-bold">🔴 Red Team:</span>
-                  </div>
-                  <div class="text-slate-700 text-sm">${redTeamList}</div>
-                </div>
-                <div class="flex-1 min-w-[200px]">
-                  <div class="flex items-center gap-2 mb-1">
                     <span class="text-blue-600 font-bold">🔵 Blue Team:</span>
                   </div>
                   <div class="text-slate-700 text-sm">${blueTeamList}</div>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-rose-600 font-bold">🔴 Red Team:</span>
+                  </div>
+                  <div class="text-slate-700 text-sm">${redTeamList}</div>
                 </div>
                 <div class="flex items-center gap-2">
                   ${winnerBadge ? `<div class="flex items-center">${winnerBadge}</div>` : ""}
