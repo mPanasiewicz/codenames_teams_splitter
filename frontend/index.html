@@ -42,6 +42,7 @@
   </head>
   <body class="container">
     <h1 class="my-4">Code Names Team Splitter</h1>
+    <div id="messageContainer"></div>
     <div class="input-group mb-3">
       <input
         type="text"
@@ -114,7 +115,7 @@
 
       async function saveSpymasters() {
         if (!currentRedSpymaster || !currentBlueSpymaster) {
-          alert('Please split teams first to save spymasters.');
+          showMessage('Please split teams first to save spymasters.', 'warning');
           return;
         }
 
@@ -130,15 +131,19 @@
             }),
           });
           const data = await response.json();
-          alert('Spymasters saved successfully!');
+          showMessage('Spymasters saved successfully!', 'success');
           await loadSpymastersHistory();
         } catch (error) {
           console.error('Error saving spymasters:', error);
-          alert('Failed to save spymasters.');
+          showMessage('Failed to save spymasters.', 'danger');
         }
       }
 
       async function clearSpymasters() {
+        if (!confirm('Are you sure you want to clear all saved spymasters?')) {
+          return;
+        }
+
         try {
           const response = await fetch(`${API_URL}/spymasters`, {
             method: 'DELETE',
@@ -146,12 +151,31 @@
           const data = await response.json();
           currentRedSpymaster = null;
           currentBlueSpymaster = null;
-          alert('Saved spymasters cleared successfully!');
+          showMessage('Saved spymasters cleared successfully!', 'success');
           await loadSpymastersHistory();
         } catch (error) {
           console.error('Error clearing spymasters:', error);
-          alert('Failed to clear spymasters.');
+          showMessage('Failed to clear spymasters.', 'danger');
         }
+      }
+
+      function showMessage(message, type = 'info') {
+        const container = document.getElementById('messageContainer');
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+          ${message}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        `;
+        container.appendChild(alertDiv);
+        
+        setTimeout(() => {
+          alertDiv.classList.remove('show');
+          setTimeout(() => alertDiv.remove(), 150);
+        }, 3000);
       }
 
       async function loadSpymastersHistory() {
@@ -233,38 +257,18 @@
 
       function splitTeams() {
         if (names.length < 4) {
-          alert("Please add at least 4 names.");
+          showMessage("Please add at least 4 names.", "warning");
           return;
         }
 
-        let availableNames = [...names];
-        let redTeam = [];
-        let blueTeam = [];
-
-        if (currentRedSpymaster && availableNames.includes(currentRedSpymaster)) {
-          redTeam.push(currentRedSpymaster);
-          availableNames = availableNames.filter(n => n !== currentRedSpymaster);
-        }
-
-        if (currentBlueSpymaster && availableNames.includes(currentBlueSpymaster)) {
-          blueTeam.push(currentBlueSpymaster);
-          availableNames = availableNames.filter(n => n !== currentBlueSpymaster);
-        }
-
-        const shuffledNames = availableNames.sort(() => 0.5 - Math.random());
+        const shuffledNames = [...names].sort(() => 0.5 - Math.random());
         const totalPerTeam = Math.ceil(names.length / 2);
-        const redNeeded = totalPerTeam - redTeam.length;
-        const blueNeeded = totalPerTeam - blueTeam.length;
 
-        redTeam.push(...shuffledNames.slice(0, redNeeded));
-        blueTeam.push(...shuffledNames.slice(redNeeded, redNeeded + blueNeeded));
+        const redTeam = shuffledNames.slice(0, totalPerTeam);
+        const blueTeam = shuffledNames.slice(totalPerTeam);
 
-        if (!currentRedSpymaster) {
-          currentRedSpymaster = redTeam[0];
-        }
-        if (!currentBlueSpymaster) {
-          currentBlueSpymaster = blueTeam[0];
-        }
+        currentRedSpymaster = redTeam[0];
+        currentBlueSpymaster = blueTeam[0];
 
         displayTeam("redTeam", redTeam);
         displayTeam("blueTeam", blueTeam);
