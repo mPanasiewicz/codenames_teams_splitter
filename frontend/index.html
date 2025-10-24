@@ -4,81 +4,108 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Code Names Team Splitter</title>
-    <link
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
+      @keyframes slideIn {
+        from {
+          transform: translateY(-100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
       }
-      .team {
-        margin-top: 20px;
+      @keyframes slideOut {
+        from {
+          transform: translateY(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateY(-100%);
+          opacity: 0;
+        }
       }
-      .team h2 {
-        color: white;
-        padding: 10px;
+      .alert-enter {
+        animation: slideIn 0.3s ease-out;
       }
-      .red-team {
-        background-color: red;
-      }
-      .blue-team {
-        background-color: blue;
-      }
-      .remove-button {
-        margin-right: 10px;
-      }
-      .spymaster {
-        font-weight: bold;
-        color: gold;
-      }
-      .split-teams-button {
-        width: 100%;
-        background-color: #28a745;
-        color: white;
+      .alert-exit {
+        animation: slideOut 0.3s ease-out;
       }
     </style>
   </head>
-  <body class="container">
-    <h1 class="my-4">Code Names Team Splitter</h1>
-    <div id="messageContainer"></div>
-    <div class="input-group mb-3">
-      <input
-        type="text"
-        id="nameInput"
-        class="form-control"
-        placeholder="Enter name"
-      />
-      <div class="input-group-append">
-        <button class="btn btn-primary" onclick="addName()">Add Name</button>
+  <body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+      <div class="text-center mb-8">
+        <h1 class="text-5xl font-bold text-slate-800 mb-2">🎮 Code Names</h1>
+        <p class="text-slate-600 text-lg">Team Splitter</p>
       </div>
-    </div>
-    <ul id="nameList" class="list-group mb-3"></ul>
-    <button class="btn split-teams-button mb-3" onclick="splitTeams()">
-      Split Teams
-    </button>
-    <div class="mb-3">
-      <button class="btn btn-success mr-2" onclick="saveSpymasters()">
-        Save Spymasters
-      </button>
-      <button class="btn btn-warning" onclick="clearSpymasters()">
-        Clear Saved Spymasters
-      </button>
-    </div>
-    <div class="team red-team p-3">
-      <h2>Red Team</h2>
-      <ul id="redTeam" class="list-group"></ul>
-    </div>
-    <div class="team blue-team p-3 mt-3">
-      <h2>Blue Team</h2>
-      <ul id="blueTeam" class="list-group"></ul>
-    </div>
 
-    <div class="mt-4">
-      <h3>Last 10 Saved Spymasters</h3>
-      <div id="spymastersHistory" class="list-group">
-        <p class="text-muted">Loading history...</p>
+      <div id="messageContainer" class="fixed top-4 right-4 z-50 space-y-2 max-w-md"></div>
+
+      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+        <h2 class="text-2xl font-semibold text-slate-800 mb-4">Add Players</h2>
+        <div class="flex gap-2">
+          <input
+            type="text"
+            id="nameInput"
+            class="flex-1 px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all"
+            placeholder="Enter player name"
+          />
+          <button 
+            class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-md"
+            onclick="addName()"
+          >
+            Add
+          </button>
+        </div>
+        
+        <ul id="nameList" class="mt-4 space-y-2"></ul>
+        
+        <button 
+          class="w-full mt-6 px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-lg rounded-xl transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg"
+          onclick="splitTeams()"
+        >
+          🎲 Split Teams
+        </button>
+      </div>
+
+      <div class="flex gap-3 mb-6">
+        <button 
+          class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-md"
+          onclick="saveSpymasters()"
+        >
+          💾 Save Spymasters
+        </button>
+        <button 
+          class="flex-1 px-6 py-3 bg-slate-600 hover:bg-slate-700 text-white font-semibold rounded-xl transition-all shadow-md"
+          onclick="clearSpymasters()"
+        >
+          🗑️ Clear History
+        </button>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl shadow-xl p-6 transform transition-all hover:scale-[1.02]">
+          <h2 class="text-3xl font-bold text-white mb-4 flex items-center gap-2">
+            <span>🔴</span> Red Team
+          </h2>
+          <ul id="redTeam" class="space-y-2"></ul>
+        </div>
+
+        <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-xl p-6 transform transition-all hover:scale-[1.02]">
+          <h2 class="text-3xl font-bold text-white mb-4 flex items-center gap-2">
+            <span>🔵</span> Blue Team
+          </h2>
+          <ul id="blueTeam" class="space-y-2"></ul>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <h3 class="text-2xl font-semibold text-slate-800 mb-4">📜 History</h3>
+        <div id="spymastersHistory" class="space-y-2">
+          <p class="text-slate-400">Loading history...</p>
+        </div>
       </div>
     </div>
 
@@ -162,19 +189,24 @@
       function showMessage(message, type = 'info') {
         const container = document.getElementById('messageContainer');
         const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-        alertDiv.role = 'alert';
+        
+        const colors = {
+          success: 'bg-emerald-500 border-emerald-600',
+          warning: 'bg-amber-500 border-amber-600',
+          danger: 'bg-rose-500 border-rose-600',
+          info: 'bg-blue-500 border-blue-600'
+        };
+        
+        alertDiv.className = `${colors[type] || colors.info} text-white px-6 py-4 rounded-xl shadow-lg border-l-4 alert-enter flex items-center justify-between`;
         alertDiv.innerHTML = `
-          ${message}
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+          <span class="font-semibold">${message}</span>
+          <button onclick="this.parentElement.remove()" class="ml-4 text-white hover:text-gray-200 font-bold text-xl">×</button>
         `;
         container.appendChild(alertDiv);
         
         setTimeout(() => {
-          alertDiv.classList.remove('show');
-          setTimeout(() => alertDiv.remove(), 150);
+          alertDiv.classList.add('alert-exit');
+          setTimeout(() => alertDiv.remove(), 300);
         }, 3000);
       }
 
@@ -185,26 +217,34 @@
           const historyDiv = document.getElementById('spymastersHistory');
           
           if (!data.history || data.history.length === 0) {
-            historyDiv.innerHTML = '<p class="text-muted">No saved spymasters yet.</p>';
+            historyDiv.innerHTML = '<p class="text-slate-400">No saved spymasters yet.</p>';
             return;
           }
 
           historyDiv.innerHTML = '';
           data.history.forEach((entry) => {
             const item = document.createElement('div');
-            item.className = 'list-group-item';
+            item.className = 'bg-slate-50 border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow';
             const date = new Date(entry.createdAt).toLocaleString();
             item.innerHTML = `
-              <strong>Red:</strong> ${entry.redSpymaster} | 
-              <strong>Blue:</strong> ${entry.blueSpymaster} 
-              <span class="text-muted">(${date})</span>
+              <div class="flex flex-wrap gap-4 items-center">
+                <div class="flex items-center gap-2">
+                  <span class="text-rose-600 font-bold">🔴 Red:</span>
+                  <span class="text-slate-700">${entry.redSpymaster}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-blue-600 font-bold">🔵 Blue:</span>
+                  <span class="text-slate-700">${entry.blueSpymaster}</span>
+                </div>
+                <span class="text-slate-400 text-sm ml-auto">${date}</span>
+              </div>
             `;
             historyDiv.appendChild(item);
           });
         } catch (error) {
           console.error('Error loading history:', error);
           const historyDiv = document.getElementById('spymastersHistory');
-          historyDiv.innerHTML = '<p class="text-danger">Failed to load history.</p>';
+          historyDiv.innerHTML = '<p class="text-rose-500">Failed to load history.</p>';
         }
       }
 
@@ -212,9 +252,10 @@
         const nameList = document.getElementById("nameList");
         names.forEach((name) => {
           const li = document.createElement("li");
-          li.className =
-            "list-group-item d-flex justify-content-between align-items-center";
-          li.textContent = name;
+          li.className = "flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 hover:shadow-md transition-all";
+          li.innerHTML = `
+            <span class="text-slate-700 font-medium">${name}</span>
+          `;
           li.appendChild(createRemoveButton(name));
           nameList.appendChild(li);
         });
@@ -226,9 +267,10 @@
         if (name) {
           names.push(name);
           const li = document.createElement("li");
-          li.className =
-            "list-group-item d-flex justify-content-between align-items-center";
-          li.textContent = name;
+          li.className = "flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 hover:shadow-md transition-all";
+          li.innerHTML = `
+            <span class="text-slate-700 font-medium">${name}</span>
+          `;
           li.appendChild(createRemoveButton(name));
           document.getElementById("nameList").appendChild(li);
           nameInput.value = "";
@@ -237,8 +279,8 @@
 
       function createRemoveButton(name) {
         const button = document.createElement("button");
-        button.className = "btn btn-danger btn-sm remove-button";
-        button.textContent = "-";
+        button.className = "px-3 py-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-lg transition-all text-sm";
+        button.textContent = "✕";
         button.onclick = () => removeName(name);
         return button;
       }
