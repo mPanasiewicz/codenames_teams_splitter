@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   backend:
@@ -6,18 +6,16 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - db-data:/app
+      - ./backend:/app
+      - /app/node_modules
     environment:
       - NODE_ENV=production
 
   frontend:
     image: nginx:alpine
     ports:
-      - "8080:80"
+      - "8081:80"
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
     depends_on:
       - backend
-
-volumes:
-  db-data:

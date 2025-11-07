@@ -37,6 +37,12 @@ db.serialize(() => {
       console.error('Error adding blue_team column:', err.message);
     }
   });
+
+  db.run(`ALTER TABLE spymasters ADD COLUMN black_card TEXT`, (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.error('Error adding black_card column:', err.message);
+    }
+  });
 });
 
 app.get('/api/spymasters', (req, res) => {
@@ -67,6 +73,7 @@ app.get('/api/spymasters/history', (req, res) => {
         redTeam: row.red_team ? JSON.parse(row.red_team) : [],
         blueTeam: row.blue_team ? JSON.parse(row.blue_team) : [],
         winner: row.winner,
+        blackCard: row.black_card,
         createdAt: row.created_at
       }))
     });
@@ -88,15 +95,15 @@ app.get('/api/spymasters/stats', (req, res) => {
 });
 
 app.post('/api/spymasters', (req, res) => {
-  const { redSpymaster, blueSpymaster, redTeam, blueTeam, winner } = req.body;
-  
+  const { redSpymaster, blueSpymaster, redTeam, blueTeam, winner, blackCard } = req.body;
+
   if (!redSpymaster || !blueSpymaster) {
     return res.status(400).json({ error: 'Both spymasters are required' });
   }
-  
+
   db.run(
-    'INSERT INTO spymasters (red_spymaster, blue_spymaster, red_team, blue_team, winner) VALUES (?, ?, ?, ?, ?)',
-    [redSpymaster, blueSpymaster, JSON.stringify(redTeam || []), JSON.stringify(blueTeam || []), winner || null],
+    'INSERT INTO spymasters (red_spymaster, blue_spymaster, red_team, blue_team, winner, black_card) VALUES (?, ?, ?, ?, ?, ?)',
+    [redSpymaster, blueSpymaster, JSON.stringify(redTeam || []), JSON.stringify(blueTeam || []), winner || null, blackCard || null],
     function(err) {
       if (err) {
         return res.status(500).json({ error: err.message });
@@ -107,7 +114,8 @@ app.post('/api/spymasters', (req, res) => {
         blueSpymaster,
         redTeam,
         blueTeam,
-        winner: winner || null
+        winner: winner || null,
+        blackCard: blackCard || null
       });
     }
   );
