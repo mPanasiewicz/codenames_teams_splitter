@@ -323,6 +323,38 @@
         }
       }
 
+      function shuffleSpymaster(team) {
+        if (team === 'red' && currentRedTeam.length > 1) {
+          // Pick a random operative to become the new spymaster
+          const randomIndex = Math.floor(Math.random() * (currentRedTeam.length - 1)) + 1;
+
+          // Swap the current spymaster with the selected operative
+          const newSpymaster = currentRedTeam[randomIndex];
+          const oldSpymaster = currentRedTeam[0];
+          currentRedTeam[0] = newSpymaster;
+          currentRedTeam[randomIndex] = oldSpymaster;
+
+          currentRedSpymaster = newSpymaster;
+          displayTeam("redTeam", currentRedTeam);
+
+          showMessage(`🔀 Red team spymaster changed to ${newSpymaster}`, "info");
+        } else if (team === 'blue' && currentBlueTeam.length > 1) {
+          // Pick a random operative to become the new spymaster
+          const randomIndex = Math.floor(Math.random() * (currentBlueTeam.length - 1)) + 1;
+
+          // Swap the current spymaster with the selected operative
+          const newSpymaster = currentBlueTeam[randomIndex];
+          const oldSpymaster = currentBlueTeam[0];
+          currentBlueTeam[0] = newSpymaster;
+          currentBlueTeam[randomIndex] = oldSpymaster;
+
+          currentBlueSpymaster = newSpymaster;
+          displayTeam("blueTeam", currentBlueTeam);
+
+          showMessage(`🔀 Blue team spymaster changed to ${newSpymaster}`, "info");
+        }
+      }
+
       function markWinner(team) {
         currentWinner = team;
         const redBtn = document.getElementById("redWinBtn");
@@ -332,8 +364,18 @@
 
         redBtn.disabled = true;
         blueBtn.disabled = true;
-        redCheckbox.disabled = true;
-        blueCheckbox.disabled = true;
+        // Keep the winning team's checkbox enabled so user can mark if opponent hit black card
+        if (team === 'red') {
+          redCheckbox.disabled = false;  // Red won, so they can mark if blue hit black card
+          blueCheckbox.disabled = true;
+        } else {
+          blueCheckbox.disabled = false;  // Blue won, so they can mark if red hit black card
+          redCheckbox.disabled = true;
+        }
+
+        // Re-display teams to remove shuffle buttons after winner is selected
+        displayTeam("redTeam", currentRedTeam);
+        displayTeam("blueTeam", currentBlueTeam);
 
         showMessage(
           `🎉 ${team === "red" ? "Red" : "Blue"} Team wins! Click "Save Spymasters" to record this game.`,
@@ -562,7 +604,20 @@
         );
         const teamElement = document.getElementById(teamId);
 
-        spymasterDiv.innerHTML = `<div class="font-bold text-slate-800 text-lg">🕵️‍♂️ ${team[0]} - Spymaster</div>`;
+        // Add shuffle button only if team has more than 1 person and no winner selected yet
+        const shuffleButton = team.length > 1 && !currentWinner ?
+          `<button onclick="shuffleSpymaster('${teamId === "redTeam" ? "red" : "blue"}')"
+             class="ml-2 px-3 py-1 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-all text-sm font-bold"
+             title="Shuffle spymaster within team">
+             🔀
+           </button>` : '';
+
+        spymasterDiv.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="font-bold text-slate-800 text-lg">🕵️‍♂️ ${team[0]} - Spymaster</div>
+            ${shuffleButton}
+          </div>
+        `;
 
         teamElement.innerHTML = "";
         team.slice(1).forEach((name) => {
