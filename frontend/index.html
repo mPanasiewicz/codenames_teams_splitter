@@ -559,43 +559,155 @@
         }
       }
 
-      function splitTeams() {
+      function calculateSpymasterWeight(playerName, playerStats) {
+        const stats = playerStats.find(stat => stat.name === playerName);
+
+        if (!stats) {
+          // Player has never been a spymaster - highest priority
+          return 10;
+        }
+
+        // Base weight: inversely proportional to number of times as spymaster
+        const baseWeight = 1 / (stats.timesAsSpymaster + 1);
+
+        // Recency multiplier: increases weight based on days since last spymaster role
+        let recencyMultiplier = 1;
+        if (stats.daysSinceLastSpymaster !== null) {
+          // Add 1 for each week since last spymaster role
+          recencyMultiplier = (stats.daysSinceLastSpymaster / 7) + 1;
+        }
+
+        return baseWeight * recencyMultiplier;
+      }
+
+      function weightedRandomSelection(players, playerStats, excludePlayer = null) {
+        // Filter out excluded player if provided
+        const availablePlayers = excludePlayer
+          ? players.filter(p => p !== excludePlayer)
+          : players;
+
+        if (availablePlayers.length === 0) {
+          return null;
+        }
+
+        // Calculate weights for each player
+        const playerWeights = availablePlayers.map(player => ({
+          name: player,
+          weight: calculateSpymasterWeight(player, playerStats)
+        }));
+
+        // Calculate total weight
+        const totalWeight = playerWeights.reduce((sum, p) => sum + p.weight, 0);
+
+        // Random selection based on weights
+        let random = Math.random() * totalWeight;
+
+        for (const player of playerWeights) {
+          random -= player.weight;
+          if (random <= 0) {
+            return player.name;
+          }
+        }
+
+        // Fallback (should never happen)
+        return availablePlayers[0];
+      }
+
+      async function splitTeams() {
         if (names.length < 4) {
           showMessage("Please add at least 4 names.", "warning");
           return;
         }
 
-        const shuffledNames = [...names].sort(() => 0.5 - Math.random());
-        const totalPerTeam = Math.ceil(names.length / 2);
+        try {
+          // Fetch player statistics from backend
+          const response = await fetch(`${API_URL}/spymasters/player-stats`);
+          const playerStats = await response.json();
 
-        const redTeam = shuffledNames.slice(0, totalPerTeam);
-        const blueTeam = shuffledNames.slice(totalPerTeam);
+          // Use weighted random selection to pick spymasters
+          currentRedSpymaster = weightedRandomSelection(names, playerStats);
+          currentBlueSpymaster = weightedRandomSelection(names, playerStats, currentRedSpymaster);
 
-        currentRedSpymaster = redTeam[0];
-        currentBlueSpymaster = blueTeam[0];
-        currentRedTeam = redTeam;
-        currentBlueTeam = blueTeam;
-        currentWinner = null;
-        currentBlackCard = null;
+          // Get remaining players (excluding both spymasters)
+          const remainingPlayers = names.filter(
+            name => name !== currentRedSpymaster && name !== currentBlueSpymaster
+          );
 
-        displayTeam("redTeam", redTeam);
-        displayTeam("blueTeam", blueTeam);
+          // Shuffle remaining players
+          const shuffledRemaining = [...remainingPlayers].sort(() => 0.5 - Math.random());
 
-        const redWinSection = document.getElementById("redWinSection");
-        const blueWinSection = document.getElementById("blueWinSection");
-        const redBtn = document.getElementById("redWinBtn");
-        const blueBtn = document.getElementById("blueWinBtn");
-        const redCheckbox = document.getElementById("redBlackCard");
-        const blueCheckbox = document.getElementById("blueBlackCard");
+          // Calculate how many more players each team needs (teams should be equal or differ by 1)
+          const totalPerTeam = Math.ceil(names.length / 2);
+          const redTeamSize = totalPerTeam;
+          const blueTeamSize = names.length - totalPerTeam;
 
-        redWinSection.classList.remove("hidden");
-        blueWinSection.classList.remove("hidden");
-        redBtn.disabled = false;
-        blueBtn.disabled = false;
-        redCheckbox.disabled = false;
-        blueCheckbox.disabled = false;
-        redCheckbox.checked = false;
-        blueCheckbox.checked = false;
+          // Distribute remaining players
+          const redOperatives = shuffledRemaining.slice(0, redTeamSize - 1);
+          const blueOperatives = shuffledRemaining.slice(redTeamSize - 1);
+
+          // Build final teams with spymaster first
+          currentRedTeam = [currentRedSpymaster, ...redOperatives];
+          currentBlueTeam = [currentBlueSpymaster, ...blueOperatives];
+          currentWinner = null;
+          currentBlackCard = null;
+
+          displayTeam("redTeam", currentRedTeam);
+          displayTeam("blueTeam", currentBlueTeam);
+
+          const redWinSection = document.getElementById("redWinSection");
+          const blueWinSection = document.getElementById("blueWinSection");
+          const redBtn = document.getElementById("redWinBtn");
+          const blueBtn = document.getElementById("blueWinBtn");
+          const redCheckbox = document.getElementById("redBlackCard");
+          const blueCheckbox = document.getElementById("blueBlackCard");
+
+          redWinSection.classList.remove("hidden");
+          blueWinSection.classList.remove("hidden");
+          redBtn.disabled = false;
+          blueBtn.disabled = false;
+          redCheckbox.disabled = false;
+          blueCheckbox.disabled = false;
+          redCheckbox.checked = false;
+          blueCheckbox.checked = false;
+
+          showMessage("Teams split with weighted spymaster selection!", "success");
+        } catch (error) {
+          console.error("Error fetching player stats:", error);
+          showMessage("Failed to fetch player statistics. Using random selection.", "warning");
+
+          // Fallback to old random method if API fails
+          const shuffledNames = [...names].sort(() => 0.5 - Math.random());
+          const totalPerTeam = Math.ceil(names.length / 2);
+
+          const redTeam = shuffledNames.slice(0, totalPerTeam);
+          const blueTeam = shuffledNames.slice(totalPerTeam);
+
+          currentRedSpymaster = redTeam[0];
+          currentBlueSpymaster = blueTeam[0];
+          currentRedTeam = redTeam;
+          currentBlueTeam = blueTeam;
+          currentWinner = null;
+          currentBlackCard = null;
+
+          displayTeam("redTeam", redTeam);
+          displayTeam("blueTeam", blueTeam);
+
+          const redWinSection = document.getElementById("redWinSection");
+          const blueWinSection = document.getElementById("blueWinSection");
+          const redBtn = document.getElementById("redWinBtn");
+          const blueBtn = document.getElementById("blueWinBtn");
+          const redCheckbox = document.getElementById("redBlackCard");
+          const blueCheckbox = document.getElementById("blueBlackCard");
+
+          redWinSection.classList.remove("hidden");
+          blueWinSection.classList.remove("hidden");
+          redBtn.disabled = false;
+          blueBtn.disabled = false;
+          redCheckbox.disabled = false;
+          blueCheckbox.disabled = false;
+          redCheckbox.checked = false;
+          blueCheckbox.checked = false;
+        }
       }
 
       function displayTeam(teamId, team) {

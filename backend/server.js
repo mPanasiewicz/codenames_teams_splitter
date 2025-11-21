@@ -94,6 +94,62 @@ app.get('/api/spymasters/stats', (req, res) => {
   });
 });
 
+app.get('/api/spymasters/player-stats', (req, res) => {
+  db.all('SELECT red_spymaster, blue_spymaster, created_at FROM spymasters ORDER BY created_at DESC', (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    const playerStats = {};
+
+    rows.forEach(row => {
+      const redSpymaster = row.red_spymaster;
+      const blueSpymaster = row.blue_spymaster;
+      const createdAt = new Date(row.created_at);
+
+      if (redSpymaster) {
+        if (!playerStats[redSpymaster]) {
+          playerStats[redSpymaster] = {
+            name: redSpymaster,
+            timesAsSpymaster: 0,
+            lastSpymasterDate: null
+          };
+        }
+        playerStats[redSpymaster].timesAsSpymaster += 1;
+        if (!playerStats[redSpymaster].lastSpymasterDate || createdAt > playerStats[redSpymaster].lastSpymasterDate) {
+          playerStats[redSpymaster].lastSpymasterDate = createdAt;
+        }
+      }
+
+      if (blueSpymaster) {
+        if (!playerStats[blueSpymaster]) {
+          playerStats[blueSpymaster] = {
+            name: blueSpymaster,
+            timesAsSpymaster: 0,
+            lastSpymasterDate: null
+          };
+        }
+        playerStats[blueSpymaster].timesAsSpymaster += 1;
+        if (!playerStats[blueSpymaster].lastSpymasterDate || createdAt > playerStats[blueSpymaster].lastSpymasterDate) {
+          playerStats[blueSpymaster].lastSpymasterDate = createdAt;
+        }
+      }
+    });
+
+    const now = new Date();
+    const result = Object.values(playerStats).map(stat => ({
+      name: stat.name,
+      timesAsSpymaster: stat.timesAsSpymaster,
+      lastSpymasterDate: stat.lastSpymasterDate ? stat.lastSpymasterDate.toISOString() : null,
+      daysSinceLastSpymaster: stat.lastSpymasterDate
+        ? Math.floor((now - stat.lastSpymasterDate) / (1000 * 60 * 60 * 24))
+        : null
+    }));
+
+    res.json(result);
+  });
+});
+
 app.post('/api/spymasters', (req, res) => {
   const { redSpymaster, blueSpymaster, redTeam, blueTeam, winner, blackCard } = req.body;
 
