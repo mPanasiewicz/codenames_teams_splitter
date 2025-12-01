@@ -43,6 +43,36 @@
         </div>
       </div>
 
+      <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+        <h3 class="text-2xl font-semibold text-slate-800 mb-4">
+          🏆 Win Statistics
+        </h3>
+        <div id="winStats" class="grid md:grid-cols-2 gap-4">
+          <div
+            class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-blue-600 font-semibold text-lg">🔵 Blue Team</p>
+                <p class="text-3xl font-bold text-blue-700" id="blueWins">0</p>
+              </div>
+              <div class="text-blue-300 text-5xl">🏆</div>
+            </div>
+          </div>
+          <div
+            class="bg-gradient-to-br from-rose-50 to-red-50 border-2 border-rose-200 rounded-xl p-4"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-rose-600 font-semibold text-lg">🔴 Red Team</p>
+                <p class="text-3xl font-bold text-rose-700" id="redWins">0</p>
+              </div>
+              <div class="text-rose-300 text-5xl">🏆</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="bg-white rounded-2xl shadow-lg p-6">
         <h3 class="text-2xl font-semibold text-slate-800 mb-4">
           📈 All Player Statistics
@@ -55,6 +85,9 @@
 
     <script>
       const API_URL = "http://localhost:3000/api";
+      let allPlayers = [];
+      let currentSortColumn = 'totalWins';
+      let currentSortDirection = 'desc';
 
       async function loadAdvancedStats() {
         try {
@@ -62,7 +95,8 @@
           const data = await response.json();
 
           displayTopStats(data);
-          displayAllPlayerStats(data.allPlayerStats);
+          allPlayers = data.allPlayerStats;
+          displayAllPlayerStats();
         } catch (error) {
           console.error("Error loading advanced stats:", error);
           const container = document.getElementById("statsContainer");
@@ -140,31 +174,105 @@
         });
       }
 
-      function displayAllPlayerStats(players) {
+      function sortPlayers(column) {
+        if (currentSortColumn === column) {
+          currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSortColumn = column;
+          currentSortDirection = 'desc';
+        }
+        displayAllPlayerStats();
+      }
+
+      function getSortArrow(column) {
+        if (currentSortColumn !== column) {
+          return '<span class="text-slate-400 ml-1">↕</span>';
+        }
+        return currentSortDirection === 'asc'
+          ? '<span class="text-slate-700 ml-1">↑</span>'
+          : '<span class="text-slate-700 ml-1">↓</span>';
+      }
+
+      function displayAllPlayerStats() {
         const container = document.getElementById("allPlayerStats");
 
-        if (!players || players.length === 0) {
+        if (!allPlayers || allPlayers.length === 0) {
           container.innerHTML = '<p class="text-slate-400">No player statistics available yet.</p>';
           return;
         }
 
-        const sortedPlayers = players.sort((a, b) => {
-          const totalWinsA = a.winsAsSpymaster + a.winsAsOperative;
-          const totalWinsB = b.winsAsSpymaster + b.winsAsOperative;
-          return totalWinsB - totalWinsA;
+        const sortedPlayers = [...allPlayers].sort((a, b) => {
+          let valueA, valueB;
+
+          switch (currentSortColumn) {
+            case 'name':
+              valueA = a.name.toLowerCase();
+              valueB = b.name.toLowerCase();
+              if (currentSortDirection === 'asc') {
+                return valueA.localeCompare(valueB);
+              } else {
+                return valueB.localeCompare(valueA);
+              }
+            case 'spymasterWins':
+              valueA = a.winsAsSpymaster;
+              valueB = b.winsAsSpymaster;
+              break;
+            case 'operativeWins':
+              valueA = a.winsAsOperative;
+              valueB = b.winsAsOperative;
+              break;
+            case 'totalWins':
+              valueA = a.winsAsSpymaster + a.winsAsOperative;
+              valueB = b.winsAsSpymaster + b.winsAsOperative;
+              break;
+            case 'spymasterStreak':
+              valueA = a.maxSpymasterStreak;
+              valueB = b.maxSpymasterStreak;
+              break;
+            case 'operativeStreak':
+              valueA = a.maxOperativeStreak;
+              valueB = b.maxOperativeStreak;
+              break;
+            case 'overallStreak':
+              valueA = a.maxOverallStreak;
+              valueB = b.maxOverallStreak;
+              break;
+            default:
+              return 0;
+          }
+
+          if (currentSortDirection === 'asc') {
+            return valueA - valueB;
+          } else {
+            return valueB - valueA;
+          }
         });
 
         let tableHTML = `
           <table class="w-full text-left">
             <thead class="bg-slate-100 border-b-2 border-slate-300">
               <tr>
-                <th class="px-4 py-3 font-semibold text-slate-700">Player</th>
-                <th class="px-4 py-3 font-semibold text-slate-700 text-center">Spymaster Wins</th>
-                <th class="px-4 py-3 font-semibold text-slate-700 text-center">Operative Wins</th>
-                <th class="px-4 py-3 font-semibold text-slate-700 text-center">Total Wins</th>
-                <th class="px-4 py-3 font-semibold text-slate-700 text-center">Best Spymaster Streak</th>
-                <th class="px-4 py-3 font-semibold text-slate-700 text-center">Best Operative Streak</th>
-                <th class="px-4 py-3 font-semibold text-slate-700 text-center">Best Overall Streak</th>
+                <th class="px-4 py-3 font-semibold text-slate-700 cursor-pointer hover:bg-slate-200 transition-colors" onclick="sortPlayers('name')">
+                  Player${getSortArrow('name')}
+                </th>
+                <th class="px-4 py-3 font-semibold text-slate-700 text-center cursor-pointer hover:bg-slate-200 transition-colors" onclick="sortPlayers('spymasterWins')">
+                  Spymaster Wins${getSortArrow('spymasterWins')}
+                </th>
+                <th class="px-4 py-3 font-semibold text-slate-700 text-center cursor-pointer hover:bg-slate-200 transition-colors" onclick="sortPlayers('operativeWins')">
+                  Operative Wins${getSortArrow('operativeWins')}
+                </th>
+                <th class="px-4 py-3 font-semibold text-slate-700 text-center cursor-pointer hover:bg-slate-200 transition-colors" onclick="sortPlayers('totalWins')">
+                  Total Wins${getSortArrow('totalWins')}
+                </th>
+                <th class="px-4 py-3 font-semibold text-slate-700 text-center cursor-pointer hover:bg-slate-200 transition-colors" onclick="sortPlayers('spymasterStreak')">
+                  Best Spymaster Streak${getSortArrow('spymasterStreak')}
+                </th>
+                <th class="px-4 py-3 font-semibold text-slate-700 text-center cursor-pointer hover:bg-slate-200 transition-colors" onclick="sortPlayers('operativeStreak')">
+                  Best Operative Streak${getSortArrow('operativeStreak')}
+                </th>
+                <th class="px-4 py-3 font-semibold text-slate-700 text-center cursor-pointer hover:bg-slate-200 transition-colors" onclick="sortPlayers('overallStreak')">
+                  Best Overall Streak${getSortArrow('overallStreak')}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -195,8 +303,21 @@
         container.innerHTML = tableHTML;
       }
 
+      async function loadWinStats() {
+        try {
+          const response = await fetch(`${API_URL}/spymasters/stats`);
+          const data = await response.json();
+
+          document.getElementById("redWins").textContent = data.red || 0;
+          document.getElementById("blueWins").textContent = data.blue || 0;
+        } catch (error) {
+          console.error("Error loading win stats:", error);
+        }
+      }
+
       window.onload = () => {
         loadAdvancedStats();
+        loadWinStats();
       };
     </script>
   </body>
