@@ -83,16 +83,10 @@
 
       <div class="flex gap-3 mb-6">
         <button
-          class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-md"
+          class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-md"
           onclick="saveSpymasters()"
         >
           💾 Save Spymasters
-        </button>
-        <button
-          class="flex-1 px-6 py-3 bg-slate-600 hover:bg-slate-700 text-white font-semibold rounded-xl transition-all shadow-md"
-          onclick="clearSpymasters()"
-        >
-          🗑️ Clear History
         </button>
       </div>
 
@@ -275,26 +269,6 @@
         } catch (error) {
           console.error("Error saving spymasters:", error);
           showMessage("Failed to save spymasters.", "danger");
-        }
-      }
-
-      async function clearSpymasters() {
-        if (!confirm("Are you sure you want to clear all saved spymasters?")) {
-          return;
-        }
-
-        try {
-          const response = await fetch(`${API_URL}/spymasters`, {
-            method: "DELETE",
-          });
-          const data = await response.json();
-          currentRedSpymaster = null;
-          currentBlueSpymaster = null;
-          showMessage("Saved spymasters cleared successfully!", "success");
-          await loadSpymastersHistory();
-        } catch (error) {
-          console.error("Error clearing spymasters:", error);
-          showMessage("Failed to clear spymasters.", "danger");
         }
       }
 

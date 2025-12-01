@@ -313,15 +313,6 @@ app.delete('/api/spymasters/:id', (req, res) => {
   });
 });
 
-app.delete('/api/spymasters', (req, res) => {
-  db.run('DELETE FROM spymasters', function(err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json({ message: 'Spymasters cleared successfully' });
-  });
-});
-
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
