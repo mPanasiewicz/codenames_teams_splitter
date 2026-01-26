@@ -113,14 +113,18 @@
             >
               🏆 Blue Team Won!
             </button>
-            <label class="flex items-center gap-2 mt-2 text-white cursor-pointer">
+            <label
+              class="flex items-center gap-2 mt-2 text-white cursor-pointer"
+            >
               <input
                 type="checkbox"
                 id="blueBlackCard"
                 class="w-5 h-5 rounded cursor-pointer"
                 onchange="updateBlackCard('blue')"
               />
-              <span class="text-sm font-semibold">⬛ Red lost by black card</span>
+              <span class="text-sm font-semibold"
+                >⬛ Red lost by black card</span
+              >
             </label>
           </div>
         </div>
@@ -147,14 +151,18 @@
             >
               🏆 Red Team Won!
             </button>
-            <label class="flex items-center gap-2 mt-2 text-white cursor-pointer">
+            <label
+              class="flex items-center gap-2 mt-2 text-white cursor-pointer"
+            >
               <input
                 type="checkbox"
                 id="redBlackCard"
                 class="w-5 h-5 rounded cursor-pointer"
                 onchange="updateBlackCard('red')"
               />
-              <span class="text-sm font-semibold">⬛ Blue lost by black card</span>
+              <span class="text-sm font-semibold"
+                >⬛ Blue lost by black card</span
+              >
             </label>
           </div>
         </div>
@@ -202,6 +210,7 @@
       const API_URL = "http://localhost:3333/api";
       let names = [
         "Beth",
+        "Emily",
         "Melissa",
         "Ava",
         "Paweł",
@@ -299,16 +308,17 @@
       function updateBlackCard(winningTeam) {
         const checkbox = document.getElementById(`${winningTeam}BlackCard`);
         if (checkbox.checked) {
-          currentBlackCard = winningTeam === 'red' ? 'blue' : 'red';
+          currentBlackCard = winningTeam === "red" ? "blue" : "red";
         } else {
           currentBlackCard = null;
         }
       }
 
       function shuffleSpymaster(team) {
-        if (team === 'red' && currentRedTeam.length > 1) {
+        if (team === "red" && currentRedTeam.length > 1) {
           // Pick a random operative to become the new spymaster
-          const randomIndex = Math.floor(Math.random() * (currentRedTeam.length - 1)) + 1;
+          const randomIndex =
+            Math.floor(Math.random() * (currentRedTeam.length - 1)) + 1;
 
           // Swap the current spymaster with the selected operative
           const newSpymaster = currentRedTeam[randomIndex];
@@ -319,10 +329,14 @@
           currentRedSpymaster = newSpymaster;
           displayTeam("redTeam", currentRedTeam);
 
-          showMessage(`🔀 Red team spymaster changed to ${newSpymaster}`, "info");
-        } else if (team === 'blue' && currentBlueTeam.length > 1) {
+          showMessage(
+            `🔀 Red team spymaster changed to ${newSpymaster}`,
+            "info",
+          );
+        } else if (team === "blue" && currentBlueTeam.length > 1) {
           // Pick a random operative to become the new spymaster
-          const randomIndex = Math.floor(Math.random() * (currentBlueTeam.length - 1)) + 1;
+          const randomIndex =
+            Math.floor(Math.random() * (currentBlueTeam.length - 1)) + 1;
 
           // Swap the current spymaster with the selected operative
           const newSpymaster = currentBlueTeam[randomIndex];
@@ -333,7 +347,10 @@
           currentBlueSpymaster = newSpymaster;
           displayTeam("blueTeam", currentBlueTeam);
 
-          showMessage(`🔀 Blue team spymaster changed to ${newSpymaster}`, "info");
+          showMessage(
+            `🔀 Blue team spymaster changed to ${newSpymaster}`,
+            "info",
+          );
         }
       }
 
@@ -347,11 +364,11 @@
         redBtn.disabled = true;
         blueBtn.disabled = true;
         // Keep the winning team's checkbox enabled so user can mark if opponent hit black card
-        if (team === 'red') {
-          redCheckbox.disabled = false;  // Red won, so they can mark if blue hit black card
+        if (team === "red") {
+          redCheckbox.disabled = false; // Red won, so they can mark if blue hit black card
           blueCheckbox.disabled = true;
         } else {
-          blueCheckbox.disabled = false;  // Blue won, so they can mark if red hit black card
+          blueCheckbox.disabled = false; // Blue won, so they can mark if red hit black card
           redCheckbox.disabled = true;
         }
 
@@ -423,12 +440,10 @@
             let winnerBadge = "";
             if (entry.winner === "red") {
               const blackCardNote = entry.blackCard === "blue" ? " ⬛" : "";
-              winnerBadge =
-                `<span class="text-rose-600 font-bold">🏆 Red Won${blackCardNote}</span>`;
+              winnerBadge = `<span class="text-rose-600 font-bold">🏆 Red Won${blackCardNote}</span>`;
             } else if (entry.winner === "blue") {
               const blackCardNote = entry.blackCard === "red" ? " ⬛" : "";
-              winnerBadge =
-                `<span class="text-blue-600 font-bold">🏆 Blue Won${blackCardNote}</span>`;
+              winnerBadge = `<span class="text-blue-600 font-bold">🏆 Blue Won${blackCardNote}</span>`;
             }
 
             const redTeamList =
@@ -542,7 +557,7 @@
       }
 
       function calculateSpymasterWeight(playerName, playerStats) {
-        const stats = playerStats.find(stat => stat.name === playerName);
+        const stats = playerStats.find((stat) => stat.name === playerName);
 
         if (!stats) {
           // Player has never been a spymaster - highest priority
@@ -556,16 +571,20 @@
         let recencyMultiplier = 1;
         if (stats.daysSinceLastSpymaster !== null) {
           // Add 1 for each week since last spymaster role
-          recencyMultiplier = (stats.daysSinceLastSpymaster / 7) + 1;
+          recencyMultiplier = stats.daysSinceLastSpymaster / 7 + 1;
         }
 
         return baseWeight * recencyMultiplier;
       }
 
-      function weightedRandomSelection(players, playerStats, excludePlayer = null) {
+      function weightedRandomSelection(
+        players,
+        playerStats,
+        excludePlayer = null,
+      ) {
         // Filter out excluded player if provided
         const availablePlayers = excludePlayer
-          ? players.filter(p => p !== excludePlayer)
+          ? players.filter((p) => p !== excludePlayer)
           : players;
 
         if (availablePlayers.length === 0) {
@@ -573,9 +592,9 @@
         }
 
         // Calculate weights for each player
-        const playerWeights = availablePlayers.map(player => ({
+        const playerWeights = availablePlayers.map((player) => ({
           name: player,
-          weight: calculateSpymasterWeight(player, playerStats)
+          weight: calculateSpymasterWeight(player, playerStats),
         }));
 
         // Calculate total weight
@@ -608,15 +627,22 @@
 
           // Use weighted random selection to pick spymasters
           currentRedSpymaster = weightedRandomSelection(names, playerStats);
-          currentBlueSpymaster = weightedRandomSelection(names, playerStats, currentRedSpymaster);
+          currentBlueSpymaster = weightedRandomSelection(
+            names,
+            playerStats,
+            currentRedSpymaster,
+          );
 
           // Get remaining players (excluding both spymasters)
           const remainingPlayers = names.filter(
-            name => name !== currentRedSpymaster && name !== currentBlueSpymaster
+            (name) =>
+              name !== currentRedSpymaster && name !== currentBlueSpymaster,
           );
 
           // Shuffle remaining players
-          const shuffledRemaining = [...remainingPlayers].sort(() => 0.5 - Math.random());
+          const shuffledRemaining = [...remainingPlayers].sort(
+            () => 0.5 - Math.random(),
+          );
 
           // Calculate how many more players each team needs (teams should be equal or differ by 1)
           const totalPerTeam = Math.ceil(names.length / 2);
@@ -652,10 +678,16 @@
           redCheckbox.checked = false;
           blueCheckbox.checked = false;
 
-          showMessage("Teams split with weighted spymaster selection!", "success");
+          showMessage(
+            "Teams split with weighted spymaster selection!",
+            "success",
+          );
         } catch (error) {
           console.error("Error fetching player stats:", error);
-          showMessage("Failed to fetch player statistics. Using random selection.", "warning");
+          showMessage(
+            "Failed to fetch player statistics. Using random selection.",
+            "warning",
+          );
 
           // Fallback to old random method if API fails
           const shuffledNames = [...names].sort(() => 0.5 - Math.random());
@@ -699,12 +731,14 @@
         const teamElement = document.getElementById(teamId);
 
         // Add shuffle button only if team has more than 1 person and no winner selected yet
-        const shuffleButton = team.length > 1 && !currentWinner ?
-          `<button onclick="shuffleSpymaster('${teamId === "redTeam" ? "red" : "blue"}')"
+        const shuffleButton =
+          team.length > 1 && !currentWinner
+            ? `<button onclick="shuffleSpymaster('${teamId === "redTeam" ? "red" : "blue"}')"
              class="ml-2 px-3 py-1 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-all text-sm font-bold"
              title="Shuffle spymaster within team">
              🔀
-           </button>` : '';
+           </button>`
+            : "";
 
         spymasterDiv.innerHTML = `
           <div class="flex items-center justify-between">
