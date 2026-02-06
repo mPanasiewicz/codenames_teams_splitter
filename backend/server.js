@@ -150,6 +150,42 @@ app.get('/api/spymasters/player-stats', (req, res) => {
   });
 });
 
+app.get('/api/spymasters/players', (req, res) => {
+  db.all('SELECT red_team, blue_team, created_at FROM spymasters ORDER BY created_at DESC', (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    const players = {};
+
+    rows.forEach(row => {
+      const redTeam = row.red_team ? JSON.parse(row.red_team) : [];
+      const blueTeam = row.blue_team ? JSON.parse(row.blue_team) : [];
+      const createdAt = row.created_at;
+
+      [redTeam, blueTeam].forEach(team => {
+        team.forEach((name, index) => {
+          if (!name) return;
+          if (!players[name]) {
+            players[name] = { name, lastSpymasterDate: null, lastOperativeDate: null };
+          }
+          if (index === 0 && !players[name].lastSpymasterDate) {
+            players[name].lastSpymasterDate = createdAt;
+          } else if (index > 0 && !players[name].lastOperativeDate) {
+            players[name].lastOperativeDate = createdAt;
+          }
+        });
+      });
+    });
+
+    const result = Object.values(players).sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+    );
+
+    res.json(result);
+  });
+});
+
 app.get('/api/spymasters/advanced-stats', (req, res) => {
   db.all('SELECT red_spymaster, blue_spymaster, red_team, blue_team, winner, created_at FROM spymasters WHERE winner IS NOT NULL ORDER BY created_at ASC', (err, rows) => {
     if (err) {

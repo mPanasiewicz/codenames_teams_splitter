@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Players - Code Names</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @keyframes slideIn {
+        from {
+          transform: translateY(-100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      .stat-card {
+        animation: slideIn 0.5s ease-out;
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+      <div class="text-center mb-8">
+        <h1 class="text-5xl font-bold text-slate-800 mb-2">👥 Players</h1>
+        <p class="text-slate-600 text-lg">Last Role Dates</p>
+      </div>
+
+      <div class="mb-6 flex gap-3">
+        <a
+          href="index.html"
+          class="inline-flex items-center px-6 py-3 bg-slate-600 hover:bg-slate-700 text-white font-semibold rounded-xl transition-all shadow-md"
+        >
+          ← Back to Game
+        </a>
+        <a
+          href="stats.html"
+          class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-xl transition-all shadow-md"
+        >
+          📊 Player Statistics
+        </a>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <div id="playersTable" class="overflow-x-auto">
+          <p class="text-slate-400">Loading...</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:3333/api";
+      let allPlayers = [];
+      let currentSortColumn = 'lastSpymasterDate';
+      let currentSortDirection = 'desc';
+
+      async function loadPlayers() {
+        try {
+          const response = await fetch(`${API_URL}/spymasters/players`);
+          allPlayers = await response.json();
+          displayPlayers();
+        } catch (error) {
+          console.error("Error loading players:", error);
+          document.getElementById("playersTable").textContent = "Failed to load players.";
+        }
+      }
+
+      function sortPlayers(column) {
+        if (currentSortColumn === column) {
+          currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSortColumn = column;
+          currentSortDirection = column === 'name' ? 'asc' : 'desc';
+        }
+        displayPlayers();
+      }
+
+      function getSortArrow(column) {
+        if (currentSortColumn !== column) return ' ↕';
+        return currentSortDirection === 'asc' ? ' ↑' : ' ↓';
+      }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return 'Never';
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('en-GB');
+      }
+
+      function displayPlayers() {
+        const container = document.getElementById("playersTable");
+        container.textContent = '';
+
+        if (!allPlayers || allPlayers.length === 0) {
+          container.textContent = 'No player data available yet.';
+          return;
+        }
+
+        const sortedPlayers = [...allPlayers].sort((a, b) => {
+          let valueA, valueB;
+
+          switch (currentSortColumn) {
+            case 'name':
+              valueA = a.name.toLowerCase();
+              valueB = b.name.toLowerCase();
+              return currentSortDirection === 'asc'
+                ? valueA.localeCompare(valueB)
+                : valueB.localeCompare(valueA);
+            case 'lastSpymasterDate':
+              valueA = a.lastSpymasterDate || '';
+              valueB = b.lastSpymasterDate || '';
+              break;
+            case 'lastOperativeDate':
+              valueA = a.lastOperativeDate || '';
+              valueB = b.lastOperativeDate || '';
+              break;
+            default:
+              return 0;
+          }
+
+          if (currentSortDirection === 'asc') {
+            return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+          } else {
+            return valueB < valueA ? -1 : valueB > valueA ? 1 : 0;
+          }
+        });
+
+        const table = document.createElement('table');
+        table.className = 'w-full text-left';
+
+        const thead = document.createElement('thead');
+        thead.className = 'bg-slate-100 border-b-2 border-slate-300';
+        const headerRow = document.createElement('tr');
+
+        const columns = [
+          { key: 'name', label: 'Name' },
+          { key: 'lastSpymasterDate', label: 'Last Spymaster', subtitle: 'DD/MM/YYYY' },
+          { key: 'lastOperativeDate', label: 'Last Operative', subtitle: 'DD/MM/YYYY' }
+        ];
+
+        columns.forEach(col => {
+          const th = document.createElement('th');
+          th.className = 'px-4 py-3 font-semibold text-slate-700 cursor-pointer hover:bg-slate-200 transition-colors';
+          const labelSpan = document.createElement('span');
+          labelSpan.textContent = col.label + getSortArrow(col.key);
+          th.appendChild(labelSpan);
+          if (col.subtitle) {
+            const sub = document.createElement('div');
+            sub.className = 'text-xs font-normal text-slate-400';
+            sub.textContent = col.subtitle;
+            th.appendChild(sub);
+          }
+          th.onclick = () => sortPlayers(col.key);
+          headerRow.appendChild(th);
+        });
+
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+
+        sortedPlayers.forEach((player, index) => {
+          const tr = document.createElement('tr');
+          tr.className = (index % 2 === 0 ? 'bg-white' : 'bg-slate-50') +
+            ' border-b border-slate-200 hover:bg-slate-100 transition-colors';
+
+          const nameCell = document.createElement('td');
+          nameCell.className = 'px-4 py-3 font-medium text-slate-800';
+          nameCell.textContent = player.name;
+          tr.appendChild(nameCell);
+
+          const spymasterCell = document.createElement('td');
+          spymasterCell.className = 'px-4 py-3 text-slate-600';
+          spymasterCell.textContent = formatDate(player.lastSpymasterDate);
+          tr.appendChild(spymasterCell);
+
+          const operativeCell = document.createElement('td');
+          operativeCell.className = 'px-4 py-3 text-slate-600';
+          operativeCell.textContent = formatDate(player.lastOperativeDate);
+          tr.appendChild(operativeCell);
+
+          tbody.appendChild(tr);
+        });
+
+        table.appendChild(tbody);
+        container.appendChild(table);
+      }
+
+      window.onload = () => {
+        loadPlayers();
+      };
+    </script>
+  </body>
+</html>
