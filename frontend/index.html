@@ -565,22 +565,19 @@
       function calculateSpymasterWeight(playerName, playerStats) {
         const stats = playerStats.find((stat) => stat.name === playerName);
 
-        if (!stats) {
-          // Player has never been a spymaster - highest priority
-          return 10;
+        if (!stats || stats.daysSinceLastSpymaster === null) {
+          // Never been spymaster — treat as if they haven't played slightly
+          // longer than whoever waited the longest, so they get a gentle boost
+          const maxDays = playerStats.reduce(
+            (max, s) => Math.max(max, s.daysSinceLastSpymaster || 0),
+            0,
+          );
+          return maxDays + 7;
         }
 
-        // Base weight: inversely proportional to number of times as spymaster
-        const baseWeight = 1 / (stats.timesAsSpymaster + 1);
-
-        // Recency multiplier: increases weight based on days since last spymaster role
-        let recencyMultiplier = 1;
-        if (stats.daysSinceLastSpymaster !== null) {
-          // Add 1 for each week since last spymaster role
-          recencyMultiplier = stats.daysSinceLastSpymaster / 7 + 1;
-        }
-
-        return baseWeight * recencyMultiplier;
+        // Weight driven purely by recency: more days since last = higher weight
+        // +1 so a player who was spymaster today still has a non-zero chance
+        return stats.daysSinceLastSpymaster + 1;
       }
 
       function weightedRandomSelection(
