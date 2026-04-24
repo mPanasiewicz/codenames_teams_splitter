@@ -628,13 +628,25 @@
           const response = await fetch(`${API_URL}/spymasters/player-stats`);
           const playerStats = await response.json();
 
-          // Use weighted random selection to pick spymasters
-          currentRedSpymaster = weightedRandomSelection(names, playerStats);
-          currentBlueSpymaster = weightedRandomSelection(
-            names,
-            playerStats,
-            currentRedSpymaster,
-          );
+          // Lucas is always a spymaster — assign to a random team
+          const FORCED_SPYMASTER = "Lucas";
+          if (names.includes(FORCED_SPYMASTER)) {
+            const lucasIsRed = Math.random() < 0.5;
+            if (lucasIsRed) {
+              currentRedSpymaster = FORCED_SPYMASTER;
+              currentBlueSpymaster = weightedRandomSelection(names, playerStats, FORCED_SPYMASTER);
+            } else {
+              currentBlueSpymaster = FORCED_SPYMASTER;
+              currentRedSpymaster = weightedRandomSelection(names, playerStats, FORCED_SPYMASTER);
+            }
+          } else {
+            currentRedSpymaster = weightedRandomSelection(names, playerStats);
+            currentBlueSpymaster = weightedRandomSelection(
+              names,
+              playerStats,
+              currentRedSpymaster,
+            );
+          }
 
           // Get remaining players (excluding both spymasters)
           const remainingPlayers = names.filter(
@@ -692,15 +704,35 @@
             "warning",
           );
 
-          // Fallback to old random method if API fails
-          const shuffledNames = [...names].sort(() => 0.5 - Math.random());
+          // Fallback to random split if API fails
+          const FORCED_SPYMASTER = "Lucas";
+          let fallbackNames = [...names];
+
+          // Pull Lucas out first so team sizes stay balanced
+          if (fallbackNames.includes(FORCED_SPYMASTER)) {
+            fallbackNames = fallbackNames.filter((n) => n !== FORCED_SPYMASTER);
+          }
+
+          const shuffledNames = fallbackNames.sort(() => 0.5 - Math.random());
           const totalPerTeam = Math.ceil(names.length / 2);
 
           const redTeam = shuffledNames.slice(0, totalPerTeam);
           const blueTeam = shuffledNames.slice(totalPerTeam);
 
-          currentRedSpymaster = redTeam[0];
-          currentBlueSpymaster = blueTeam[0];
+          if (names.includes(FORCED_SPYMASTER)) {
+            if (Math.random() < 0.5) {
+              currentRedSpymaster = FORCED_SPYMASTER;
+              redTeam.unshift(FORCED_SPYMASTER);
+              currentBlueSpymaster = blueTeam[0];
+            } else {
+              currentBlueSpymaster = FORCED_SPYMASTER;
+              blueTeam.unshift(FORCED_SPYMASTER);
+              currentRedSpymaster = redTeam[0];
+            }
+          } else {
+            currentRedSpymaster = redTeam[0];
+            currentBlueSpymaster = blueTeam[0];
+          }
           currentRedTeam = redTeam;
           currentBlueTeam = blueTeam;
           currentWinner = null;
