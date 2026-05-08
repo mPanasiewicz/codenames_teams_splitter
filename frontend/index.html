@@ -232,6 +232,59 @@
       let currentWinner = null;
       let currentBlackCard = null;
 
+      const SESSION_KEY = 'codenames_current_game';
+
+      function saveGameToSession() {
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+          redTeam: currentRedTeam,
+          blueTeam: currentBlueTeam,
+          winner: currentWinner,
+          blackCard: currentBlackCard,
+        }));
+      }
+
+      function restoreGameFromSession() {
+        const saved = sessionStorage.getItem(SESSION_KEY);
+        if (!saved) return;
+
+        const state = JSON.parse(saved);
+        currentRedTeam = state.redTeam || [];
+        currentBlueTeam = state.blueTeam || [];
+        currentRedSpymaster = currentRedTeam[0] || null;
+        currentBlueSpymaster = currentBlueTeam[0] || null;
+        currentWinner = state.winner || null;
+        currentBlackCard = state.blackCard || null;
+
+        if (!currentRedTeam.length || !currentBlueTeam.length) return;
+
+        displayTeam('redTeam', currentRedTeam);
+        displayTeam('blueTeam', currentBlueTeam);
+
+        const redWinSection = document.getElementById('redWinSection');
+        const blueWinSection = document.getElementById('blueWinSection');
+        const redBtn = document.getElementById('redWinBtn');
+        const blueBtn = document.getElementById('blueWinBtn');
+        const redCheckbox = document.getElementById('redBlackCard');
+        const blueCheckbox = document.getElementById('blueBlackCard');
+
+        redWinSection.classList.remove('hidden');
+        blueWinSection.classList.remove('hidden');
+
+        if (currentWinner) {
+          redBtn.disabled = true;
+          blueBtn.disabled = true;
+          redCheckbox.disabled = currentWinner !== 'red';
+          blueCheckbox.disabled = currentWinner !== 'blue';
+          if (currentBlackCard === 'red') redCheckbox.checked = true;
+          if (currentBlackCard === 'blue') blueCheckbox.checked = true;
+        } else {
+          redBtn.disabled = false;
+          blueBtn.disabled = false;
+          redCheckbox.disabled = false;
+          blueCheckbox.disabled = false;
+        }
+      }
+
       async function loadSavedSpymasters() {
         try {
           const response = await fetch(`${API_URL}/spymasters`);
@@ -277,6 +330,7 @@
           });
           const data = await response.json();
           showMessage("Spymasters saved successfully!", "success");
+          sessionStorage.removeItem(SESSION_KEY);
           await loadSpymastersHistory();
           await loadWinStats();
         } catch (error) {
@@ -379,6 +433,7 @@
         // Re-display teams to remove shuffle buttons after winner is selected
         displayTeam("redTeam", currentRedTeam);
         displayTeam("blueTeam", currentBlueTeam);
+        saveGameToSession();
 
         showMessage(
           `🎉 ${team === "red" ? "Red" : "Blue"} Team wins! Click "Save Spymasters" to record this game.`,
@@ -662,6 +717,7 @@
 
           displayTeam("redTeam", currentRedTeam);
           displayTeam("blueTeam", currentBlueTeam);
+          saveGameToSession();
 
           const redWinSection = document.getElementById("redWinSection");
           const blueWinSection = document.getElementById("blueWinSection");
@@ -706,6 +762,7 @@
 
           displayTeam("redTeam", redTeam);
           displayTeam("blueTeam", blueTeam);
+          saveGameToSession();
 
           const redWinSection = document.getElementById("redWinSection");
           const blueWinSection = document.getElementById("blueWinSection");
@@ -763,6 +820,7 @@
         await loadSpymastersHistory();
         await loadWinStats();
         initializeNames();
+        restoreGameFromSession();
       };
     </script>
   </body>
